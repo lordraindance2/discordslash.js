@@ -8,8 +8,11 @@ class AddCommandRequest extends CommandRequest {
     }
 
 
-    post(client) {
-        const url = `https://discord.com/api/v${client.apiVersion}/applications/${client.applicationid}/guilds/292086052934516739/commands`
+    post(client, guildID) {
+        const url = (typeof(guildID) === "undefined") ? 
+            `https://discord.com/api/v8/applications/${client.applicationid}/commands` : 
+            `https://discord.com/api/v${client.apiVersion}/applications/${client.applicationid}/guilds/${guildID}/commands`;
+        console.log(url);
         const headers = {
             'Content-Type': 'application/json',
             "Authorization": `Bot ${client.token}`
@@ -22,11 +25,14 @@ class AddCommandRequest extends CommandRequest {
             data: data
         };
         axios(config).then(response => {
+            console.log(response["data"]);
             console.log(`Successfully added the command ${this.name}`);
         }).catch(error => {
             console.log(error["response"]);
         });
+
     }
+
 }
 
 module.exports = AddCommandRequest;

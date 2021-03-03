@@ -46,6 +46,7 @@ const main = async () => {
         console.log("Bot is now online!");
     }
     const addreq = makePokemonCommand();
+    console.log("Test");
     addreq.post(client);
     process.on('SIGINT', () => {
         console.log("Caught interrupt signal");
