@@ -3,7 +3,7 @@ const getGateway = require("./slash/util/GetGateway.js");
 const Client = require("./slash/Client.js");
 const AddCommandRequest = require("./slash/command/AddCommandRequest.js");
 const CommandOptions = require("./slash/command/options/CommandOptions.js");
-const { STRING } = require("./slash/command/options/CommandOptionType.js");
+const { STRING, SUB_COMMAND } = require("./slash/command/options/CommandOptionType.js");
 let client;
 
 const API_VERSION = 8;
@@ -20,12 +20,13 @@ const makePokemonCommand = () => {
     const option = new CommandOptions();
     option.setName("name")
         .setType(STRING)
-        .setDescription("Pokemon name")
-        .setRequired(true);
+        .setDescription("Find pokemon by name")
+        .setRequired(false);
     addreq.setDescription("Find a pokemon")
         .addOption(option);
     return addreq;
 };
+
 const main = async () => {
     //cache the url
     const baseLink = await getGateway(API_VERSION);
@@ -34,7 +35,7 @@ const main = async () => {
         process.exit(1);
     }
     cachedGateUrl = `${baseLink}/?v=${API_VERSION}&encoding=${DEFAULT_ENCODING}`;
-    client = new Client(API_VERSION, DEFAULT_ENCODING, cachedGateUrl);
+    client = new Client(API_VERSION, DEFAULT_ENCODING, cachedGateUrl); //replace with discord.js client in the future
     client.initWebSocket();
     client.listen(listen);
     if(await client.validConnection()) {

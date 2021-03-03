@@ -15,7 +15,6 @@ class AddCommandRequest extends CommandRequest {
             "Authorization": `Bot ${client.token}`
         };
         const data = this.format();
-        console.log(data);
         const config = {
             method: 'post',
             url: url,

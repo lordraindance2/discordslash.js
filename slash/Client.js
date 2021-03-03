@@ -1,5 +1,10 @@
 const WebSocket = require('ws');
+const axios = require('axios').default;
 const { READY } = require('./GatewayEvent.js');
+const parseArgs = require("./util/ParseArgs.js");
+const InteractionResponse = require('./interaction/InteractionResponse.js');
+const InteractionCallBack = require('./interaction/InteractionCallback.js');
+const { ChannelMessageWithSource, Pong } = require('./interaction/InteractionResponseType.js');
 const { HELLO, IDENTIFY, HEARTBEATACK, HEARTBEAT, DISPATCH, RESUME } = require('./Opcode.js');
 
 class Client {
@@ -129,12 +134,41 @@ class Client {
 
     handleDispatch(msg) {
         const event = msg["t"];
-        console.log(msg);
+        //console.log(msg);
         switch(event) {
             case READY:
                 this.sessionid = msg["d"]["session_id"];
                 this.applicationid = msg["d"]["application"]["id"];
                 this.authorized = true;
+                break;
+            case INTERACTION_CREATE:
+                const d = msg["d"];
+                const member = d["member"];
+                const intID = d["id"];
+                const token = d["token"]; //interaction token
+                const data = d["data"];
+
+                //todo: event emitter
+                console.log(data);
+                const response = new InteractionResponse(this, member, intID, token, data);
+                const args = parseArgs(data["options"]);
+                const url = `https://pokeapi.co/api/v2/pokemon/${args["name"]}`;
+                axios.get(url).then(pokemon => {
+                    const embeddedImage = {"image": {"url": pokemon["data"]["sprites"]["front_shiny"]}};
+                    response.setResponseType(ChannelMessage)
+                        .setCallback(
+                            new InteractionCallBack()
+                            .addEmbed(embeddedImage))
+                        .respond();
+                }).catch(err => {
+                    response.setResponseType(ChannelMessage)
+                        .setCallback(
+                            new InteractionCallBack()
+                            .setContent(`${args["name"]} was not found!`))
+                        .respond();
+                });
+                break;
+            case APPLICATION_COMMAND_UPDATE:
                 break;
         }
     }
