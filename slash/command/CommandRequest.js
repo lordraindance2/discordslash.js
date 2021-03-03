@@ -1,10 +1,51 @@
 class CommandRequest {
     constructor(name) {
-        this.name = name;
-        this.description = null;
-
+        this._name = name;
+        this._description = null;
+        this._options = [];   
     }
 
+    get name() {
+        return this._name;
+    }
+
+    setName(value) {
+        this._name = value;
+        return this;
+    }
+
+    get description() {
+        return this._description;
+    }
+
+    setDescription(value) {
+        this._description = value;
+        return this;
+    }
+
+    get options() {
+        return this._options;
+    }
+
+    addOption(option) {
+        this._options.push(option);
+    }
+
+    format() {
+        let formattedOptions = [];
+        for (const option of this._options) {
+            formattedOptions.push(option.format());
+        }
+        const command = {
+            "name": this._name,
+            "description": this._description,
+        };
+        if (formattedOptions.length != 0) {
+            command["options"] = formattedOptions;
+        } 
+        return command;
+    }
+    /*
     format() {
         return {
             "name": "blep",
@@ -39,6 +80,7 @@ class CommandRequest {
             ]
         };        
     }
+    */
 }
 
 

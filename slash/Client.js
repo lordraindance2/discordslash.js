@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const { READY } = require('./GatewayEvent.js');
 const { HELLO, IDENTIFY, HEARTBEATACK, HEARTBEAT, DISPATCH, RESUME } = require('./Opcode.js');
 
 class Client {
@@ -83,7 +84,6 @@ class Client {
 
     handleHeartbeat(msg) {
         msg = JSON.parse(msg);
-        console.log(msg);
         const opcode = msg["op"];
         this.sequenceNumber = msg["s"];
         switch (opcode) {
@@ -122,12 +122,19 @@ class Client {
                 this.resuming = false;
                 break;
             case DISPATCH:
-                if (msg["t"] === "READY") {
-                    this.sessionid = msg["d"]["session_id"];
-                    this.applicationid = msg["d"]["application"]["id"];
-                    this.authorized = true;
-                    break;
-                }
+                this.handleDispatch(msg);
+                break;
+        }
+    }
+
+    handleDispatch(msg) {
+        const event = msg["t"];
+        console.log(msg);
+        switch(event) {
+            case READY:
+                this.sessionid = msg["d"]["session_id"];
+                this.applicationid = msg["d"]["application"]["id"];
+                this.authorized = true;
                 break;
         }
     }

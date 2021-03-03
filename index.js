@@ -1,8 +1,9 @@
 require('dotenv').config();
 const getGateway = require("./slash/util/GetGateway.js");
 const Client = require("./slash/Client.js");
-const AddCommandRequest = require("./slash/command/AddCommandRequest");
-
+const AddCommandRequest = require("./slash/command/AddCommandRequest.js");
+const CommandOptions = require("./slash/command/options/CommandOptions.js");
+const { STRING } = require("./slash/command/options/CommandOptionType.js");
 let client;
 
 const API_VERSION = 8;
@@ -14,6 +15,17 @@ const listen = (msg) => {
     //console.log(msg);
 };
 
+const makePokemonCommand = () => {
+    const addreq = new AddCommandRequest("pokemon");
+    const option = new CommandOptions();
+    option.setName("name")
+        .setType(STRING)
+        .setDescription("Pokemon name")
+        .setRequired(true);
+    addreq.setDescription("Find a pokemon")
+        .addOption(option);
+    return addreq;
+};
 const main = async () => {
     //cache the url
     const baseLink = await getGateway(API_VERSION);
@@ -32,7 +44,7 @@ const main = async () => {
     if(await client.validAuthorize()) {
         console.log("Bot is now online!");
     }
-    const addreq = new AddCommandRequest("test");
+    const addreq = makePokemonCommand();
     addreq.post(client);
     process.on('SIGINT', () => {
         console.log("Caught interrupt signal");
